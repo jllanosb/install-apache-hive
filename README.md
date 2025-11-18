@@ -153,3 +153,45 @@ cd /opt/hive/lib
 wget https://jdbc.postgresql.org/download/postgresql-42.7.3.jar
 sudo chown hadoop:hadoop postgresql-42.7.3.jar
 ```
+
+# 5. Configuración Hive Metastore
+Configurar `hive-site.xml`
+```
+sudo -u hadoop nano /opt/hive/conf/hive-site.xml
+```
+Agregar las Lineas:
+```bash
+<configuration>
+
+ <property>
+   <name>javax.jdo.option.ConnectionURL</name>
+   <value>jdbc:postgresql://localhost:5432/hive_metastore</value>
+ </property>
+
+ <property>
+   <name>javax.jdo.option.ConnectionDriverName</name>
+   <value>org.postgresql.Driver</value>
+ </property>
+
+ <property>
+   <name>javax.jdo.option.ConnectionUserName</name>
+   <value>hiveuser</value>
+ </property>
+
+ <property>
+   <name>javax.jdo.option.ConnectionPassword</name>
+   <value>HivePassword123</value>
+ </property>
+
+ <property>
+   <name>datanucleus.autoCreateSchema</name>
+   <value>false</value>
+ </property>
+
+ <property>
+   <name>hive.metastore.warehouse.dir</name>
+   <value>/user/hive/warehouse</value>
+ </property>
+
+</configuration>
+```
