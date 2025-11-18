@@ -195,3 +195,41 @@ Agregar las Lineas:
 
 </configuration>
 ```
+# 6. Inicializar BD Metastore
+```bash
+cd /opt/hive
+schematool -dbType postgres -initSchema
+```
+si → Executed successfully
+```
+Initialization script completed
+schemaTool completed
+```
+Hive está ok.
+
+# 7. Configurar Hive con Beeline
+
+Edita el archivo `core-site.xml`
+```bash
+sudo nano /opt/hadoop/etc/hadoop/core-site.xml
+```
+Abre en tu nodo maestro (donde está Hadoop) y agregar las lineas dentro de `<configuration>`:
+```bash
+<property>
+  <name>hadoop.proxyuser.hadoop.hosts</name>
+  <value>*</value>
+</property>
+
+<property>
+  <name>hadoop.proxyuser.hadoop.groups</name>
+  <value>*</value>
+</property>
+```
+# 8. Crear warehouse en HDFS
+```bash
+hdfs dfs -mkdir -p /user/hive/warehouse
+hdfs dfs -chmod -R 777 /user/hive/warehouse
+
+hdfs dfs -mkdir -p /tmp/hive
+hdfs dfs -chmod -R 777 /tmp/hive
+```
