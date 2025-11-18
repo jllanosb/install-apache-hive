@@ -119,3 +119,37 @@ Salir de `psql`:
 ```sql
 \q
 ```
+
+# 2. Descargar Apache Hive 3.1.3
+
+Hive 3.1.3 (estable para enterprise productivo real con Java 11). ![Consulta nuevas versiones](https://hive.apache.org/general/downloads/)
+```bash
+cd /tmp
+sudo wget https://archive.apache.org/dist/hive/hive-3.1.3/apache-hive-3.1.3-bin.tar.gz
+sudo mkdir -p /opt/hive
+sudo tar -xzf apache-hive-3.1.3-bin.tar.gz -C /opt/hive --strip-components=1
+sudo chown -R hadoop:hadoop /opt/hive
+```
+
+# 3. Variables de entorno Hive
+Abrir
+```bash
+sudo -u hadoop nano ~/.bashrc
+```
+Agregar al final:
+```bash
+# Apache Hive
+export HIVE_HOME=/opt/hive
+export PATH=$PATH:$HIVE_HOME/bin
+```
+Actualizar
+```bash
+source ~/.bashrc
+```
+# 4. Descargar Driver JDBC PostgreSQL
+Descargar version mas compatible.
+```bash
+cd /opt/hive/lib
+wget https://jdbc.postgresql.org/download/postgresql-42.7.3.jar
+sudo chown hadoop:hadoop postgresql-42.7.3.jar
+```
