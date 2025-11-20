@@ -37,7 +37,7 @@ Almacenamiento: HDFS / S3 / ADLS / GCS
 - Hive 2.x --> JDK 8
 - Hive 3.x --> JDK 8 o 11
 - Hive 4.x (2024–2025) --> JDK 11 o 17 (recomendado: JDK 17 LTS)
-3. **Hadoop (HDFS + YARN)**
+3. **Hadoop (HDFS + YARN)** [Instalar Apache Hadoop 3.4.2](https://github.com/jllanosb/install-apache-hadoop)
 - Hadoop --> 3.3.x o superior (Hive 4.x requiere Hadoop ≥ 3.3)
 - HDFS --> Debe estar en ejecución y accesible (hdfs dfs -ls /)
 - YARN --> Necesario para ejecutar trabajos (MapReduce/Tez/Spark)
