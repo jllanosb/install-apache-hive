@@ -272,7 +272,7 @@ show databases;
 
 # 10. Configurar Hive con Beeline
 
-Edita el archivo `core-site.xml`
+🔹1️⃣ Edita el archivo `core-site.xml`
 ```bash
 sudo nano /opt/hadoop/etc/hadoop/core-site.xml
 ```
@@ -294,3 +294,86 @@ Abre en tu nodo maestro (donde está Hadoop) y agregar las lineas dentro de `<co
 </property>
 
 ```
+🔹2️⃣ Guarda y reinicia los servicios de Hadoop y Hive
+
+Ejecuta en el servidor:
+```bash
+stop-yarn.sh
+stop-dfs.sh
+
+# Si HiveServer2 está en ejecución:
+pkill -f HiveServer2
+```
+Luego reinicia todo:
+```bash
+start-dfs.sh
+start-yarn.sh
+hive --service hiveserver2 &
+```
+### 3️⃣ Iniciar la conexión en una terminal
+Acceso Localhost:
+```bash
+beeline -u jdbc:hive2://localhost:10000 -n hadoop -p
+```
+Acceso WSL:
+```bash
+beeline -u jdbc:hive2://172.29.96.93:10000 -n hadoop -p
+```
+Acceso  IP_PUBLICA
+```bash
+beeline -u jdbc:hive2://IP_PUBLICA:10000 -n hadoop -p
+```
+Configurar si y solo si sale
+```
+Error: Could not open client transport with JDBC Uri: jdbc:hive2://localhost:10000: java.net.ConnectException: Connection refused: connect (state=08S01,code=0)
+Beeline version 2.3.9 by Apache Hive
+beeline> show databases;
+No current connection
+```
+```bash
+sudo nano $HIVE_HOME/conf/hive-site.xml
+```
+Para que acepte conexiones externas
+```bash
+
+<property>
+  <name>hive.server2.thrift.bind.host</name>
+  <!--value>localhost</value-->
+  <value>0.0.0.0</value>
+  <description>Bind HiveServer2 to all interfaces</description>
+</property>
+
+```
+Luego reinicia HiveServer2:
+```bash
+pkill -f HiveServer2
+hive --service hiveserver2 &
+```
+
+# 11. Comandos Básicos
+Listar bases de datos:
+```bash
+SHOW DATABASES;
+```
+Crear y base de datos `test_db` :
+```bash
+CREATE DATABASE IF NOT EXISTS test_db;
+USE test_db;
+```
+Crear una tabla en la base de datos:
+```bash
+CREATE TABLE test_table (id INT, name STRING);
+SHOW TABLES;
+```
+Insertar un registro:
+```bash
+INSERT INTO test_db.test_table VALUES (1, "Jaime");
+```
+Consultar registros:
+```bash
+SELECT * FROM test_db.test_table;
+```
+
+© 2025 Jaime Llanos Bardales.
+
+Este trabajo está bajo una licencia [Creative Commons Attribution 4.0 Internacional](LICENSE).
