@@ -122,7 +122,7 @@ Salir de `psql`:
 
 # 2. Descargar Apache Hive 3.1.3
 
-Hive 3.1.3 (estable para enterprise productivo real con Java 11). ![Consulta nuevas versiones](https://hive.apache.org/general/downloads/)
+Hive 3.1.3 (estable para enterprise productivo real con Java 11). [Consulta nuevas versiones](https://hive.apache.org/general/downloads/)
 ```bash
 cd /tmp
 sudo wget https://archive.apache.org/dist/hive/hive-3.1.3/apache-hive-3.1.3-bin.tar.gz
@@ -195,7 +195,51 @@ Agregar las Lineas:
 
 </configuration>
 ```
-# 6. Inicializar BD Metastore
+# 6. Habilitar Java 8
+## 🔹 Paso 1: Instalar OpenJDK 8
+
+En Ubuntu/Debian:
+
+```bash
+sudo apt update
+sudo apt install openjdk-8-jdk -y
+```
+## 🔹Paso 2: Configurar Hive y Hadoop para usar Java 8
+
+Verifica qué versiones de Java tienes:
+
+```bash
+update-alternatives --config java
+```
+Selecciona la opción que apunte a Java 8 (normalmente `/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java`).
+
+También puedes exportar la ruta manualmente en tu entorno:
+```bash
+sudo nano ~/.bashrc
+```
+Para hacerlo permanente, agrega esas líneas a tu archivo:
+```bash
+# Java 8
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+export PATH=$JAVA_HOME/bin:$PATH
+```
+y luego recarga el entorno:
+
+```bash
+source ~/.bashrc
+```
+## 🔹Paso 3: Verifica la versión de Java usada por Hive
+
+Ejecuta:
+```bash
+java -version
+```
+
+Debe mostrar algo como:
+```
+openjdk version "1.8.0_412"
+```
+# 7. Inicializar BD Metastore
 ```bash
 cd /opt/hive
 schematool -dbType postgres -initSchema
@@ -207,7 +251,26 @@ schemaTool completed
 ```
 Hive está ok.
 
-# 7. Configurar Hive con Beeline
+# 8. Crear warehouse en HDFS
+```bash
+hdfs dfs -mkdir -p /user/hive/warehouse
+hdfs dfs -chmod -R 777 /user/hive/warehouse
+
+hdfs dfs -mkdir -p /tmp/hive
+hdfs dfs -chmod -R 777 /tmp/hive
+```
+# 9. Probar Hive
+Iniciar Servicio
+```bash
+# hive --service metastore
+hive --service hiveserver2 &
+```
+Listrar base de adentro:
+```bash
+show databases;
+```
+
+# 10. Configurar Hive con Beeline
 
 Edita el archivo `core-site.xml`
 ```bash
@@ -224,12 +287,10 @@ Abre en tu nodo maestro (donde está Hadoop) y agregar las lineas dentro de `<co
   <name>hadoop.proxyuser.hadoop.groups</name>
   <value>*</value>
 </property>
-```
-# 8. Crear warehouse en HDFS
-```bash
-hdfs dfs -mkdir -p /user/hive/warehouse
-hdfs dfs -chmod -R 777 /user/hive/warehouse
 
-hdfs dfs -mkdir -p /tmp/hive
-hdfs dfs -chmod -R 777 /tmp/hive
+<property>
+  <name>hive.server2.thrift.port</name>
+  <value>10000</value>
+</property>
+
 ```
