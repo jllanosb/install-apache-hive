@@ -374,6 +374,54 @@ Consultar registros:
 SELECT * FROM test_db.test_table;
 ```
 
+# 12. Soluciones
+
+Agregar la biblioteca faltante 
+🔹Paso 1: Descargar commons-collections v3.2.2 
+
+Ejecuta en tu servidor (hadoop-master): 
+```bash
+cd /opt/hive/lib
+sudo wget https://repo1.maven.org/maven2/commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.jar
+```
+✅ Esta es la versión compatible con la mayoría de distribuciones de Hadoop/Hive. 
+
+🔹Paso 2: (Opcional) Verifica que no haya conflicto con commons-collections4 
+
+Asegúrate de que también tengas la versión 4 (usada por Hive 3): 
+```bash
+ls /opt/hive/lib/commons-collections4-*.jar
+```
+
+Si no está, instálala también (aunque Hive normalmente la incluye): 
+bash
+```bash
+sudo wget https://repo1.maven.org/maven2/org/apache/commons/commons-collections4/4.4/commons-collections4-4.4.jar
+```
+✅ Tener ambas versiones (commons-collections y commons-collections4) es normal y necesario en Hive 3.x. 
+ 
+🔹🔁 Paso 3: Vuelve a iniciar el Metastore 
+
+Primero, asegúrate de que no haya procesos anteriores: 
+```bash
+pkill -f HiveMetaStore
+```
+Luego inicia el Metastore: 
+```bash
+hive --service metastore &
+```
+Ahora debería iniciar sin el error de `ClassNotFoundException`. 
+🔹🛠️ Verificación adicional 
+Puedes confirmar que el JAR está en el classpath listando: 
+```bash
+ls -l /opt/hive/lib/commons-collections*.jar
+```
+Deberías ver algo como: 
+```bash
+commons-collections-3.2.2.jar
+commons-collections4-4.4.jar
+``` 
+
 © 2025 Jaime Llanos Bardales.
 
 Este trabajo está bajo una licencia [Creative Commons Attribution 4.0 Internacional](LICENSE).
