@@ -265,10 +265,6 @@ Iniciar Servicio
 # hive --service metastore
 hive --service hiveserver2 &
 ```
-Listrar base de adentro:
-```bash
-show databases;
-```
 
 # 10. Configurar Hive con Beeline
 
@@ -323,6 +319,9 @@ Acceso  IP_PUBLICA
 ```bash
 beeline -u jdbc:hive2://IP_PUBLICA:10000 -n hadoop -p
 ```
+
+# 11. Configurar Beeline para conexion externa
+
 Configurar si y solo si sale
 ```
 Error: Could not open client transport with JDBC Uri: jdbc:hive2://localhost:10000: java.net.ConnectException: Connection refused: connect (state=08S01,code=0)
@@ -350,31 +349,7 @@ pkill -f HiveServer2
 hive --service hiveserver2 &
 ```
 
-# 11. Comandos Básicos
-Listar bases de datos:
-```bash
-SHOW DATABASES;
-```
-Crear y base de datos `test_db` :
-```bash
-CREATE DATABASE IF NOT EXISTS test_db;
-USE test_db;
-```
-Crear una tabla en la base de datos:
-```bash
-CREATE TABLE test_table (id INT, name STRING);
-SHOW TABLES;
-```
-Insertar un registro:
-```bash
-INSERT INTO test_db.test_table VALUES (1, "Jaime");
-```
-Consultar registros:
-```bash
-SELECT * FROM test_db.test_table;
-```
-
-# 12. Soluciones
+# 12. Agregar librerias faltantes
 
 Agregar la biblioteca faltante 
 🔹Paso 1: Descargar commons-collections v3.2.2 
@@ -421,6 +396,30 @@ Deberías ver algo como:
 commons-collections-3.2.2.jar
 commons-collections4-4.4.jar
 ``` 
+
+# 13. Probando Hive usando los Comandos Básicos SQL
+Listar bases de datos:
+```bash
+SHOW DATABASES;
+```
+Crear y base de datos `test_db` :
+```bash
+CREATE DATABASE IF NOT EXISTS test_db;
+USE test_db;
+```
+Crear una tabla en la base de datos:
+```bash
+CREATE TABLE test_table (id INT, name STRING);
+SHOW TABLES;
+```
+Insertar un registro:
+```bash
+INSERT INTO test_db.test_table VALUES (1, "Jaime");
+```
+Consultar registros:
+```bash
+SELECT * FROM test_db.test_table;
+```
 
 © 2025 Jaime Llanos Bardales.
 
