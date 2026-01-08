@@ -482,6 +482,26 @@ Consultar datos de la tabla `Carrera`:
 SELECT * FROM BIGDATA.ALUMNO; 
 ```
 
+# 15. Soluciones de Permisos de Escritura
+
+Solucion individual:
+```bash
+hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/bigdata.db
+hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/alumno.db
+hdfs dfs -chmod -R 775 /user/hive/warehouse/bigdata.db
+hdfs dfs -chmod -R 775 /user/hive/warehouse/alumno.db
+```
+Verificar:
+```bash
+hdfs dfs -ls /user/hive/warehouse/bigdata.db
+```
+Se visualiza asi `hive hadoop ...`:
+```
+drwxrwxr-x hive hadoop alumno
+drwxrwxr-x hive hadoop carrera
+```
+
+
 © 2025 Jaime Llanos Bardales.
 
 Este trabajo está bajo una licencia [Creative Commons Attribution 4.0 Internacional](LICENSE).
