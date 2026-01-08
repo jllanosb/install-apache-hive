@@ -252,6 +252,7 @@ schemaTool completed
 Hive está ok.
 
 # 8. Crear warehouse en HDFS
+Creando Warehouse para hive:
 ```bash
 hdfs dfs -mkdir -p /user/hive/warehouse
 hdfs dfs -chmod -R 777 /user/hive/warehouse
@@ -259,6 +260,13 @@ hdfs dfs -chmod -R 777 /user/hive/warehouse
 hdfs dfs -mkdir -p /tmp/hive
 hdfs dfs -chmod -R 777 /tmp/hive
 ```
+
+Asignando Permisos:
+```
+hdfs dfs -chown -R hive:hadoop /user/hive/warehouse
+hdfs dfs -chmod -R 775 /user/hive/warehouse
+```
+
 # 9. Probar Hive
 Iniciar Servicio
 ```bash
