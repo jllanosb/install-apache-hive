@@ -487,9 +487,7 @@ SELECT * FROM BIGDATA.ALUMNO;
 Solucion individual:
 ```bash
 hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/bigdata.db
-hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/alumno.db
 hdfs dfs -chmod -R 775 /user/hive/warehouse/bigdata.db
-hdfs dfs -chmod -R 775 /user/hive/warehouse/alumno.db
 ```
 Verificar:
 ```bash
@@ -500,8 +498,16 @@ Se visualiza asi `hive hadoop ...`:
 drwxrwxr-x hive hadoop alumno
 drwxrwxr-x hive hadoop carrera
 ```
-
-
+Detener servicios:
+```
+pkill -f HiveMetaStore
+pkill -f HiveServer2
+```
+Iniciar nuevamente servicios
+```
+hive --service hiveserver2 &
+hive --service metastore &
+```
 © 2025 Jaime Llanos Bardales.
 
 Este trabajo está bajo una licencia [Creative Commons Attribution 4.0 Internacional](LICENSE).
