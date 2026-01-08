@@ -351,7 +351,6 @@ hive --service hiveserver2 &
 
 # 12. Agregar librerias faltantes
 
-Agregar la biblioteca faltante 
 🔹Paso 1: Descargar commons-collections v3.2.2 
 
 Ejecuta en tu servidor (hadoop-master): 
@@ -419,6 +418,60 @@ INSERT INTO test_db.test_table VALUES (1, "Jaime");
 Consultar registros:
 ```bash
 SELECT * FROM test_db.test_table;
+```
+
+# 14. Ejercicio 2 para probar HIVE 3.1.3
+
+Crear la base de datos `Bigdata`:
+```bash
+CREATE DATABASE BIGDATA;
+```
+
+Crear la tabla `Alumno` dentro de la base de datos `Bigdata`:
+```bash
+CREATE TABLE BIGDATA.ALUMNO ( 
+IDALUMNO INT,
+NOMBREALUMNO STRING,
+IDCARRERA INT) 
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY '|'
+LINES TERMINATED BY '\n'
+STORED AS TEXTFILE;
+```
+
+Crear la tabla `Carrera` dentro de la base de datos `Bigdata`:
+```bash
+CREATE TABLE BIGDATA.CARRERA ( 
+IDCARRERA INT,
+NOMBRECARRERA STRING) 
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY '|'
+LINES TERMINATED BY '\n'
+STORED AS TEXTFILE;
+```
+
+Insertar datos a la tabla `Carrera` dentro de la base de datos `Bigdata`:
+```bash
+INSERT INTO BIGDATA.CARRERA VALUES (1, 'Ingenieria de Sistemas'); 
+INSERT INTO BIGDATA.CARRERA VALUES (2, 'Ciencia de Datos');
+INSERT INTO BIGDATA.CARRERA VALUES (3, 'Ciberseguridad'); 
+```
+
+Insertar datos a la tabla `Alumno` dentro de la base de datos `Bigdata`:
+```bash
+INSERT INTO BIGDATA.ALUMNO VALUES (1, 'Martin Perez', 1); 
+INSERT INTO BIGDATA.ALUMNO VALUES (2, 'Arlenis Esperanto', 2);
+INSERT INTO BIGDATA.ALUMNO VALUES (3, 'Dahian Reyes', 3); 
+```
+
+Consultar datos de la tabla `Alumno`:
+```bash
+SELECT * FROM BIGDATA.ALUMNO; 
+```
+
+Consultar datos de la tabla `Carrera`:
+```bash
+SELECT * FROM BIGDATA.ALUMNO; 
 ```
 
 © 2025 Jaime Llanos Bardales.
