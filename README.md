@@ -267,7 +267,7 @@ hdfs dfs -chown -R hive:hadoop /user/hive/warehouse
 hdfs dfs -chmod -R 775 /user/hive/warehouse
 ```
 
-# 9. Probar Hive
+# 9. Iniciar Hive
 Iniciar Servicio
 ```bash
 # hive --service metastore
@@ -317,15 +317,15 @@ hive --service hiveserver2 &
 ### 3️⃣ Iniciar la conexión en una terminal
 Acceso Localhost:
 ```bash
-beeline -u jdbc:hive2://localhost:10000 -n hadoop -p
+beeline -u jdbc:hive2://localhost:10000 -n hadoop -p --verbose=true
 ```
 Acceso WSL:
 ```bash
-beeline -u jdbc:hive2://172.29.96.93:10000 -n hadoop -p
+beeline -u jdbc:hive2://172.29.96.93:10000 -n hadoop -p --verbose=true
 ```
 Acceso  IP_PUBLICA
 ```bash
-beeline -u jdbc:hive2://IP_PUBLICA:10000 -n hadoop -p
+beeline -u jdbc:hive2://IP_PUBLICA:10000 -n hadoop -p --verbose=true
 ```
 
 # 11. Configurar Beeline para conexion externa
@@ -405,6 +405,14 @@ commons-collections4-4.4.jar
 ``` 
 
 # 13. Probando Hive usando los Comandos Básicos SQL
+Revisar `usuario` activo:
+```bash
+SELECT current_user();
+```
+Version de `Hive` corriendo:
+```bash
+SELECT version();
+```
 Listar bases de datos:
 ```bash
 SHOW DATABASES;
@@ -416,9 +424,37 @@ USE test_db;
 ```
 Crear una tabla en la base de datos:
 ```bash
-CREATE TABLE test_table (id INT, name STRING);
+CREATE TABLE test_table (id INT, name STRING)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY '|'
+LINES TERMINATED BY '\n'
+STORED AS TEXTFILE;
 SHOW TABLES;
 ```
+
+Habilitar `Permisos en HDFS de acceso ala base de datos para el usuario Hive`
+
+Asinar permisos: 
+```bash
+hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/test_db.db
+hdfs dfs -chmod -R 775 /user/hive/warehouse/test_db.db
+```
+verificar permisos:
+```bash
+hdfs dfs -ls /user/hive/warehouse/test_db.db
+```
+
+Reiniciar servicios:
+```bash
+# Detener
+pkill -f HiveMetaStore
+pkill -f HiveServer2
+
+# Iniciar nuevamente servicios
+hive --service hiveserver2 &
+hive --service metastore &
+```
+
 Insertar un registro:
 ```bash
 INSERT INTO test_db.test_table VALUES (1, "Jaime");
@@ -457,6 +493,23 @@ FIELDS TERMINATED BY '|'
 LINES TERMINATED BY '\n'
 STORED AS TEXTFILE;
 ```
+Asignar y verificar Permisos:
+```bash
+hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/bigdata.db
+hdfs dfs -chmod -R 775 /user/hive/warehouse/bigdata.db
+hdfs dfs -ls /user/hive/warehouse/bigdata.db
+```
+
+Reiniciar servicios:
+```bash
+# Detener
+pkill -f HiveMetaStore
+pkill -f HiveServer2
+
+# Iniciar nuevamente servicios
+hive --service hiveserver2 &
+hive --service metastore &
+```
 
 Insertar datos a la tabla `Carrera` dentro de la base de datos `Bigdata`:
 ```bash
@@ -486,28 +539,29 @@ SELECT * FROM BIGDATA.ALUMNO;
 
 Solucion individual:
 ```bash
-hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/bigdata.db
-hdfs dfs -chmod -R 775 /user/hive/warehouse/bigdata.db
+hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/BASEDEDATOSCREADA.db
+hdfs dfs -chmod -R 775 /user/hive/warehouse/BASEDEDATOSCREADA.db
 ```
 Verificar:
 ```bash
-hdfs dfs -ls /user/hive/warehouse/bigdata.db
+hdfs dfs -ls /user/hive/warehouse/BASEDEDATOSCREADA.db
 ```
 Se visualiza asi `hive hadoop ...`:
 ```
 drwxrwxr-x hive hadoop alumno
 drwxrwxr-x hive hadoop carrera
 ```
-Detener servicios:
-```
+Reiniciar servicios:
+```bash
+# Detener
 pkill -f HiveMetaStore
 pkill -f HiveServer2
-```
-Iniciar nuevamente servicios
-```
+
+# Iniciar nuevamente servicios
 hive --service hiveserver2 &
 hive --service metastore &
 ```
+
 © 2025 Jaime Llanos Bardales.
 
 Este trabajo está bajo una licencia [Creative Commons Attribution 4.0 Internacional](LICENSE).
