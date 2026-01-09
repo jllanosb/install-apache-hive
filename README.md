@@ -569,13 +569,14 @@ Consultar datos de la tabla `Carrera`:
 ```sql
 SELECT * FROM BIGDATA.ALUMNO; 
 ```
-# 15 Tabla en produccion
-
+# 15. Tabla en produccion
+Crear base de datos, poner uso, crear tabla particionada:
+```sql
 CREATE DATABASE IF NOT EXISTS produccion
 LOCATION '/data/hive/produccion';
 
 USE produccion;
-```sql
+
 CREATE TABLE IF NOT EXISTS empleados (
     id_empleado        INT,
     nombre             STRING,
@@ -593,6 +594,18 @@ TBLPROPERTIES (
     'transactional'='false'
 );
 ```
+Cargar Datos:
+```sql
+INSERT INTO TABLE empleados
+PARTITION (anio=2026, mes=1)
+VALUES (1, 'Jaime', 'Sistemas', 3113.15, '2026-01-08');
+```
+```sql
+INSERT INTO TABLE empleados
+PARTITION (anio=2026, mes=1)
+VALUES (2, 'Diana', 'Administradora', 2013.15, '2026-01-08');
+```
+
 # 16. Soluciones de Permisos de Escritura
 
 Solucion individual:
