@@ -60,7 +60,7 @@ Crear usuario y BD para metastore Hive:
 sudo -u postgres psql
 ```
 Crear base de datos dentro de postgres:
-```bash
+```sql
 CREATE DATABASE hive_metastore;
 CREATE USER hiveuser WITH PASSWORD 'HivePassword123';
 GRANT ALL PRIVILEGES ON DATABASE hive_metastore TO hiveuser;
@@ -160,7 +160,7 @@ Configurar `hive-site.xml`
 sudo -u hadoop nano /opt/hive/conf/hive-site.xml
 ```
 Agregar las Lineas:
-```bash
+```xml
 <configuration>
 
   <property>
@@ -201,6 +201,11 @@ Agregar las Lineas:
 <property>
   <name>hive.metastore.schema.verification</name>
   <value>true</value>
+</property>
+
+<property>
+  <name>hive.execution.engine</name>
+  <value>tez</value>
 </property>
 
   <property>
@@ -292,7 +297,7 @@ hdfs dfs -chmod -R 775 /tmp/hive
 ```
 
 Asignando Permisos:
-```
+```bash
 hdfs dfs -chown -R hive:hadoop /user/hive/warehouse
 hdfs dfs -chmod -R 775 /user/hive/warehouse
 ```
@@ -311,7 +316,7 @@ hive --service hiveserver2 &
 sudo nano /opt/hadoop/etc/hadoop/core-site.xml
 ```
 Abre en tu nodo maestro (donde está Hadoop) y agregar las lineas dentro de `<configuration>`:
-```bash
+```xml
 <property>
   <name>hadoop.proxyuser.hadoop.hosts</name>
   <value>*</value>
@@ -371,7 +376,7 @@ No current connection
 sudo nano $HIVE_HOME/conf/hive-site.xml
 ```
 Para que acepte conexiones externas
-```bash
+```xml
 
 <property>
   <name>hive.server2.thrift.bind.host</name>
@@ -436,24 +441,24 @@ commons-collections4-4.4.jar
 
 # 13. Probando Hive usando los Comandos Básicos SQL
 Revisar `usuario` activo:
-```bash
+```sql
 SELECT current_user();
 ```
 Version de `Hive` corriendo:
-```bash
+```sql
 SELECT version();
 ```
 Listar bases de datos:
-```bash
+```sql
 SHOW DATABASES;
 ```
 Crear y base de datos `test_db` :
-```bash
+```sql
 CREATE DATABASE IF NOT EXISTS test_db;
 USE test_db;
 ```
 Crear una tabla en la base de datos:
-```bash
+```sql
 CREATE TABLE test_table (id INT, name STRING)
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY '|'
@@ -486,23 +491,23 @@ hive --service metastore &
 ```
 
 Insertar un registro:
-```bash
+```sql
 INSERT INTO test_db.test_table VALUES (1, "Jaime");
 ```
 Consultar registros:
-```bash
+```sql
 SELECT * FROM test_db.test_table;
 ```
 
 # 14. Ejercicio 2 para probar HIVE 3.1.3
 
 Crear la base de datos `Bigdata`:
-```bash
+```sql
 CREATE DATABASE BIGDATA;
 ```
 
 Crear la tabla `Alumno` dentro de la base de datos `Bigdata`:
-```bash
+```sql
 CREATE TABLE BIGDATA.ALUMNO ( 
 IDALUMNO INT,
 NOMBREALUMNO STRING,
@@ -514,7 +519,7 @@ STORED AS TEXTFILE;
 ```
 
 Crear la tabla `Carrera` dentro de la base de datos `Bigdata`:
-```bash
+```sql
 CREATE TABLE BIGDATA.CARRERA ( 
 IDCARRERA INT,
 NOMBRECARRERA STRING) 
@@ -542,30 +547,53 @@ hive --service metastore &
 ```
 
 Insertar datos a la tabla `Carrera` dentro de la base de datos `Bigdata`:
-```bash
+```sql
 INSERT INTO BIGDATA.CARRERA VALUES (1, 'Ingenieria de Sistemas'); 
 INSERT INTO BIGDATA.CARRERA VALUES (2, 'Ciencia de Datos');
 INSERT INTO BIGDATA.CARRERA VALUES (3, 'Ciberseguridad'); 
 ```
 
 Insertar datos a la tabla `Alumno` dentro de la base de datos `Bigdata`:
-```bash
+```sql
 INSERT INTO BIGDATA.ALUMNO VALUES (1, 'Martin Perez', 1); 
 INSERT INTO BIGDATA.ALUMNO VALUES (2, 'Arlenis Esperanto', 2);
 INSERT INTO BIGDATA.ALUMNO VALUES (3, 'Dahian Reyes', 3); 
 ```
 
 Consultar datos de la tabla `Alumno`:
-```bash
+```sql
 SELECT * FROM BIGDATA.ALUMNO; 
 ```
 
 Consultar datos de la tabla `Carrera`:
-```bash
+```sql
 SELECT * FROM BIGDATA.ALUMNO; 
 ```
+# 15 Tabla en produccion
 
-# 15. Soluciones de Permisos de Escritura
+CREATE DATABASE IF NOT EXISTS produccion
+LOCATION '/data/hive/produccion';
+
+USE produccion;
+```sql
+CREATE TABLE IF NOT EXISTS empleados (
+    id_empleado        INT,
+    nombre             STRING,
+    departamento       STRING,
+    salario            DECIMAL(10,2),
+    fecha_ingreso      DATE
+)
+PARTITIONED BY (
+    anio INT,
+    mes  INT
+)
+STORED AS ORC
+TBLPROPERTIES (
+    'orc.compress'='SNAPPY',
+    'transactional'='false'
+);
+```
+# 16. Soluciones de Permisos de Escritura
 
 Solucion individual:
 ```bash
