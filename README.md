@@ -163,35 +163,65 @@ Agregar las Lineas:
 ```bash
 <configuration>
 
- <property>
-   <name>javax.jdo.option.ConnectionURL</name>
-   <value>jdbc:postgresql://localhost:5432/hive_metastore</value>
- </property>
+  <property>
+    <name>javax.jdo.option.ConnectionURL</name>
+    <value>jdbc:postgresql://localhost:5432/hive_metastore</value>
+  </property>
 
- <property>
-   <name>javax.jdo.option.ConnectionDriverName</name>
-   <value>org.postgresql.Driver</value>
- </property>
+  <property>
+    <name>javax.jdo.option.ConnectionDriverName</name>
+    <value>org.postgresql.Driver</value>
+  </property>
 
- <property>
-   <name>javax.jdo.option.ConnectionUserName</name>
-   <value>hiveuser</value>
- </property>
+  <property>
+    <name>javax.jdo.option.ConnectionUserName</name>
+    <value>hiveuser</value>
+  </property>
 
- <property>
-   <name>javax.jdo.option.ConnectionPassword</name>
-   <value>HivePassword123</value>
- </property>
+  <property>
+    <name>javax.jdo.option.ConnectionPassword</name>
+    <value>HivePassword123</value>
+  </property>
 
- <property>
-   <name>datanucleus.autoCreateSchema</name>
-   <value>false</value>
- </property>
+  <property>
+    <name>datanucleus.autoCreateSchema</name>
+    <value>false</value>
+  </property>
 
- <property>
-   <name>hive.metastore.warehouse.dir</name>
-   <value>/user/hive/warehouse</value>
- </property>
+  <property>
+    <name>hive.metastore.warehouse.dir</name>
+    <value>/user/hive/warehouse</value>
+  </property>
+
+  <property>
+  <name>hive.metastore.uris</name>
+  <value>thrift://localhost:9083</value>
+</property>
+
+<property>
+  <name>hive.metastore.schema.verification</name>
+  <value>true</value>
+</property>
+
+  <property>
+    <name>hive.support.concurrency</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>hive.txn.manager</name>
+    <value>org.apache.hadoop.hive.ql.lockmgr.DbTxnManager</value>
+  </property>
+
+  <property>
+    <name>hive.compactor.initiator.on</name>
+    <value>true</value>
+  </property>
+
+  <property>
+    <name>hive.compactor.worker.threads</name>
+    <value>1</value>
+  </property>
 
 </configuration>
 ```
@@ -255,10 +285,10 @@ Hive está ok.
 Creando Warehouse para hive:
 ```bash
 hdfs dfs -mkdir -p /user/hive/warehouse
-hdfs dfs -chmod -R 777 /user/hive/warehouse
+hdfs dfs -chmod -R 775 /user/hive/warehouse
 
 hdfs dfs -mkdir -p /tmp/hive
-hdfs dfs -chmod -R 777 /tmp/hive
+hdfs dfs -chmod -R 775 /tmp/hive
 ```
 
 Asignando Permisos:
