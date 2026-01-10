@@ -146,6 +146,19 @@ Actualizar
 ```bash
 source ~/.bashrc
 ```
+
+Verificar version:
+```
+hive --version
+```
+
+Resultado de la version:
+```txt
+Hive 3.1.3
+Git git://MacBook-Pro.fios-router.home/Users/ngangam/commit/hive -r 4df4d75bf1e16fe0af75aad0b4179c34c07fc975
+Compiled by ngangam on Sun Apr 3 16:58:16 EDT 2022
+From source with checksum 5da234766db5dfbe3e92926c9bbab2af
+```
 # 4. Descargar Driver JDBC PostgreSQL
 Descargar version mas compatible.
 ```bash
@@ -209,7 +222,7 @@ sudo apt install openjdk-8-jdk -y
 Verifica qué versiones de Java tienes:
 
 ```bash
-update-alternatives --config java
+sudo update-alternatives --config java
 ```
 Selecciona la opción que apunte a Java 8 (normalmente `/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java`).
 
@@ -284,12 +297,6 @@ Abre en tu nodo maestro (donde está Hadoop) y agregar las lineas dentro de `<co
 ```xml
 
   <property>
-    <name>fs.defaultFS</name>
-    <value>hdfs://localhost:9000</value>
-    <!--value>hdfs://hadoop-master:9000</value-->
-  </property>
-
-  <property>
     <name>hadoop.proxyuser.hadoop.hosts</name>
     <value>*</value>
   </property>
@@ -322,19 +329,6 @@ start-dfs.sh
 start-yarn.sh
 hive --service hiveserver2 &
 ```
-### 3️⃣ Abrir una `Nueva Ventana` de Terminal para realizar la conexión
-Acceso Localhost:
-```bash
-beeline -u jdbc:hive2://localhost:10000 -n hadoop -p --verbose=true
-```
-Acceso WSL:
-```bash
-beeline -u jdbc:hive2://172.29.96.93:10000 -n hadoop -p --verbose=true
-```
-Acceso  IP_PUBLICA
-```bash
-beeline -u jdbc:hive2://IP_PUBLICA:10000 -n hadoop -p --verbose=true
-```
 
 # 11. Configurar Beeline para conexion externa
 
@@ -350,6 +344,11 @@ sudo nano $HIVE_HOME/conf/hive-site.xml
 ```
 Para que acepte conexiones externas
 ```xml
+
+<property>
+  <name>hive.server2.thrift.port</name>
+  <value>10000</value>
+</property>
 
 <property>
   <name>hive.server2.thrift.bind.host</name>
@@ -376,7 +375,7 @@ sudo wget https://repo1.maven.org/maven2/commons-collections/commons-collections
 ```
 ✅ Esta es la versión compatible con la mayoría de distribuciones de Hadoop/Hive. 
 
-🔹Paso 2: (Opcional) Verifica que no haya conflicto con commons-collections4 
+🔹Paso 2: Verifica que no haya conflicto con commons-collections4 
 
 Asegúrate de que también tengas la versión 4 (usada por Hive 3): 
 ```bash
@@ -411,14 +410,24 @@ Deberías ver algo como:
 commons-collections-3.2.2.jar
 commons-collections4-4.4.jar
 ``` 
+# 13. Acceder a Hive `Abrir una Nueva Ventana` de Terminal para realizar la conexión
+Acceso Localhost:
+```bash
+beeline -u jdbc:hive2://localhost:10000 -n hadoop -p --verbose=true
+```
+Acceso WSL:
+```bash
+beeline -u jdbc:hive2://172.29.96.93:10000 -n hadoop -p --verbose=true
+```
+Acceso  IP_PUBLICA
+```bash
+beeline -u jdbc:hive2://IP_PUBLICA:10000 -n hadoop -p --verbose=true
+```
 
 # 13. Probando Hive usando los Comandos Básicos SQL
-Revisar `usuario` activo:
+Revisar `usuario` activo y Version de `Hive` corriendo::
 ```sql
 SELECT current_user();
-```
-Version de `Hive` corriendo:
-```sql
 SELECT version();
 ```
 Listar bases de datos:
@@ -445,7 +454,7 @@ Habilitar `Permisos en HDFS de acceso ala base de datos para el usuario Hive`
 Asinar permisos: 
 ```bash
 hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/test_db.db
-hdfs dfs -chmod -R 775 /user/hive/warehouse/test_db.db
+hdfs dfs -chmod -R 777 /user/hive/warehouse/test_db.db
 ```
 verificar permisos:
 ```bash
@@ -505,7 +514,7 @@ STORED AS TEXTFILE;
 Asignar y verificar Permisos:
 ```bash
 hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/bigdata.db
-hdfs dfs -chmod -R 775 /user/hive/warehouse/bigdata.db
+hdfs dfs -chmod -R 777 /user/hive/warehouse/bigdata.db
 hdfs dfs -ls /user/hive/warehouse/bigdata.db
 ```
 
@@ -580,12 +589,12 @@ PARTITION (anio=2026, mes=1)
 VALUES (5, 'Pepito', 'Administradora', 2013.15, '2026-01-08');
 ```
 
-# 16. Soluciones de Permisos de Escritura
+# 16. Soluciones de Permisos de Escritura (Test)
 
 Solucion individual:
 ```bash
 hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/BASEDEDATOSCREADA.db
-hdfs dfs -chmod -R 775 /user/hive/warehouse/BASEDEDATOSCREADA.db
+hdfs dfs -chmod -R 777 /user/hive/warehouse/BASEDEDATOSCREADA.db
 ```
 Verificar:
 ```bash
@@ -606,6 +615,9 @@ pkill -f HiveServer2
 hive --service hiveserver2 &
 hive --service metastore &
 ```
+
+`Nota`: En Produccion se usa el permiso `775` 
+
 
 © 2025 Jaime Llanos Bardales.
 
