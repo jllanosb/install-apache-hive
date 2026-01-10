@@ -283,25 +283,21 @@ sudo nano /opt/hadoop/etc/hadoop/core-site.xml
 Abre en tu nodo maestro (donde está Hadoop) y agregar las lineas dentro de `<configuration>`:
 ```xml
 
-<property>
-  <name>fs.defaultFS</name>
-  <!--value>hdfs://localhost:9000</value-->
-  <value>hdfs://hadoop-master:9000</value>
-</property>
-<property>
-  <name>fs.defaultFS</name>
-  <value>hdfs://namenode:8020</value>
-</property>
+  <property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://localhost:9000</value>
+    <!--value>hdfs://hadoop-master:9000</value-->
+  </property>
 
-<property>
-  <name>hadoop.proxyuser.hadoop.hosts</name>
-  <value>*</value>
-</property>
+  <property>
+    <name>hadoop.proxyuser.hadoop.hosts</name>
+    <value>*</value>
+  </property>
 
-<property>
-  <name>hadoop.proxyuser.hadoop.groups</name>
-  <value>*</value>
-</property>
+  <property>
+    <name>hadoop.proxyuser.hadoop.groups</name>
+    <value>*</value>
+  </property>
 
   <!-- (Opcional) ubicación del directorio temporal -->
   <property>
@@ -463,8 +459,9 @@ pkill -f HiveMetaStore
 pkill -f HiveServer2
 
 # Iniciar nuevamente servicios
-hive --service hiveserver2 &
 hive --service metastore &
+sleep 10
+hive --service hiveserver2 &
 ```
 
 Insertar un registro:
