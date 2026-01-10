@@ -424,7 +424,7 @@ Acceso  IP_PUBLICA
 beeline -u jdbc:hive2://IP_PUBLICA:10000 -n hadoop -p --verbose=true
 ```
 
-# 13. Probando Hive usando los Comandos Básicos SQL
+# 14. Probando Hive usando los Comandos Básicos SQL
 Revisar `usuario` activo y Version de `Hive` corriendo::
 ```sql
 SELECT current_user();
@@ -434,31 +434,41 @@ Listar bases de datos:
 ```sql
 SHOW DATABASES;
 ```
-Crear y base de datos `test_db` :
+Crear y Activar uso de base de datos `BIGDATA` :
 ```sql
-CREATE DATABASE IF NOT EXISTS test_db;
-USE test_db;
+CREATE DATABASE IF NOT EXISTS BIGDATA;
+USE BIGDATA;
 ```
-Crear una tabla en la base de datos:
+Crear una tabla en la base de datos tipo `TextFile`:
 ```sql
-CREATE TABLE test_table (id INT, name STRING)
+CREATE TABLE PERSONA (id INT, name STRING)
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY '|'
 LINES TERMINATED BY '\n'
 STORED AS TEXTFILE;
-SHOW TABLES;
+```
+
+Verificar la tabla creada
+```sql
+SHOW TABLES IN BIGDATA;
+```
+Descripción de las columnas y sus tipos de datos.
+```sql
+DESC BIGDATA.PERSONA;
+```
+
+Descripción más detallada de la tabla
+```sql
+DESC FORMATTED BIGDATA.PERSONA;
 ```
 
 Habilitar `Permisos en HDFS de acceso ala base de datos para el usuario Hive`
 
-Asinar permisos: 
+Asinar y verificar permisos: 
 ```bash
-hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/test_db.db
-hdfs dfs -chmod -R 777 /user/hive/warehouse/test_db.db
-```
-verificar permisos:
-```bash
-hdfs dfs -ls /user/hive/warehouse/test_db.db
+hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/BIGDATA.db
+hdfs dfs -chmod -R 777 /user/hive/warehouse/BIGDATA.db
+hdfs dfs -ls /user/hive/warehouse/BIGDATA.db
 ```
 
 Reiniciar servicios:
@@ -473,92 +483,27 @@ sleep 10
 hive --service hiveserver2 &
 ```
 
-Insertar un registro:
+Insertar un registro de modo tradicional (Hive trabaja formatos ORC, PARQUET, Avro en produccion):
 ```sql
-INSERT INTO test_db.test_table VALUES (1, "Jaime");
+INSERT INTO test_db.test_table VALUES (1, 'Jaime');
+-- Generará errores
 ```
 Consultar registros:
 ```sql
 SELECT * FROM test_db.test_table;
 ```
-
-# 14. Ejercicio 2 para probar HIVE 3.1.3
-
-Crear la base de datos `Bigdata`:
+Eliminar base de datos y todas las tablas:
 ```sql
-CREATE DATABASE BIGDATA;
+DROP DATABASE test_db CASCADE;
 ```
 
-Crear la tabla `Alumno` dentro de la base de datos `Bigdata`:
-```sql
-CREATE TABLE BIGDATA.ALUMNO ( 
-IDALUMNO INT,
-NOMBREALUMNO STRING,
-IDCARRERA INT) 
-ROW FORMAT DELIMITED
-FIELDS TERMINATED BY '|'
-LINES TERMINATED BY '\n'
-STORED AS TEXTFILE;
-```
-
-Crear la tabla `Carrera` dentro de la base de datos `Bigdata`:
-```sql
-CREATE TABLE BIGDATA.CARRERA ( 
-IDCARRERA INT,
-NOMBRECARRERA STRING) 
-ROW FORMAT DELIMITED
-FIELDS TERMINATED BY '|'
-LINES TERMINATED BY '\n'
-STORED AS TEXTFILE;
-```
-Asignar y verificar Permisos:
-```bash
-hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/bigdata.db
-hdfs dfs -chmod -R 777 /user/hive/warehouse/bigdata.db
-hdfs dfs -ls /user/hive/warehouse/bigdata.db
-```
-
-Reiniciar servicios:
-```bash
-# Detener
-pkill -f HiveMetaStore
-pkill -f HiveServer2
-
-# Iniciar nuevamente servicios
-hive --service hiveserver2 &
-hive --service metastore &
-```
-
-Insertar datos a la tabla `Carrera` dentro de la base de datos `Bigdata`:
-```sql
-INSERT INTO BIGDATA.CARRERA VALUES (1, 'Ingenieria de Sistemas'); 
-INSERT INTO BIGDATA.CARRERA VALUES (2, 'Ciencia de Datos');
-INSERT INTO BIGDATA.CARRERA VALUES (3, 'Ciberseguridad'); 
-```
-
-Insertar datos a la tabla `Alumno` dentro de la base de datos `Bigdata`:
-```sql
-INSERT INTO BIGDATA.ALUMNO VALUES (1, 'Martin Perez', 1); 
-INSERT INTO BIGDATA.ALUMNO VALUES (2, 'Arlenis Esperanto', 2);
-INSERT INTO BIGDATA.ALUMNO VALUES (3, 'Dahian Reyes', 3); 
-```
-
-Consultar datos de la tabla `Alumno`:
-```sql
-SELECT * FROM BIGDATA.ALUMNO; 
-```
-
-Consultar datos de la tabla `Carrera`:
-```sql
-SELECT * FROM BIGDATA.ALUMNO; 
-```
 # 15. Tabla en produccion
 Crear base de datos, poner uso, crear tabla particionada:
 ```sql
-CREATE DATABASE IF NOT EXISTS produccion
-LOCATION '/data/hive/produccion';
+CREATE DATABASE IF NOT EXISTS BIGDATA
+LOCATION '/data/hive//warehouse/BIGDATA';
 
-USE produccion;
+USE BIGDATA;
 
 CREATE TABLE IF NOT EXISTS empleados (
     id_empleado        INT,
@@ -577,6 +522,7 @@ TBLPROPERTIES (
     'transactional'='false'
 );
 ```
+
 Cargar Datos:
 ```sql
 INSERT INTO TABLE empleados
@@ -586,7 +532,21 @@ VALUES (1, 'Jaime', 'Sistemas', 3113.15, '2026-01-08');
 ```sql
 INSERT INTO TABLE empleados
 PARTITION (anio=2026, mes=1)
-VALUES (5, 'Pepito', 'Administradora', 2013.15, '2026-01-08');
+VALUES (2, 'Diana', 'Administradora', 2013.15, '2026-01-09');
+```
+```sql
+INSERT INTO TABLE empleados
+PARTITION (anio=2026, mes=1)
+VALUES (3, 'Susana', 'Cajera', 2013.15, '2026-01-10');
+```
+```sql
+INSERT INTO TABLE empleados
+PARTITION (anio=2026, mes=1)
+VALUES (4, 'Iris', 'Secretaria', 2013.15, '2026-01-07');
+```
+Consultar registros:
+```sql
+SELECT * FROM empleados;
 ```
 
 # 16. Soluciones de Permisos de Escritura (Test)
