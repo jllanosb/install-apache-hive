@@ -193,41 +193,6 @@ Agregar las Lineas:
     <value>/user/hive/warehouse</value>
   </property>
 
-  <property>
-  <name>hive.metastore.uris</name>
-  <value>thrift://localhost:9083</value>
-</property>
-
-<property>
-  <name>hive.metastore.schema.verification</name>
-  <value>true</value>
-</property>
-
-<property>
-  <name>hive.execution.engine</name>
-  <value>tez</value>
-</property>
-
-  <property>
-    <name>hive.support.concurrency</name>
-    <value>true</value>
-  </property>
-
-  <property>
-    <name>hive.txn.manager</name>
-    <value>org.apache.hadoop.hive.ql.lockmgr.DbTxnManager</value>
-  </property>
-
-  <property>
-    <name>hive.compactor.initiator.on</name>
-    <value>true</value>
-  </property>
-
-  <property>
-    <name>hive.compactor.worker.threads</name>
-    <value>1</value>
-  </property>
-
 </configuration>
 ```
 # 6. Habilitar Java 8
@@ -290,16 +255,16 @@ Hive está ok.
 Creando Warehouse para hive:
 ```bash
 hdfs dfs -mkdir -p /user/hive/warehouse
-hdfs dfs -chmod -R 775 /user/hive/warehouse
+hdfs dfs -chmod -R 777 /user/hive/warehouse
 
 hdfs dfs -mkdir -p /tmp/hive
-hdfs dfs -chmod -R 775 /tmp/hive
+hdfs dfs -chmod -R 777 /tmp/hive
 ```
 
 Asignando Permisos:
 ```bash
 hdfs dfs -chown -R hive:hadoop /user/hive/warehouse
-hdfs dfs -chmod -R 775 /user/hive/warehouse
+hdfs dfs -chmod -R 777 /user/hive/warehouse
 ```
 
 # 9. Iniciar Hive
@@ -317,6 +282,17 @@ sudo nano /opt/hadoop/etc/hadoop/core-site.xml
 ```
 Abre en tu nodo maestro (donde está Hadoop) y agregar las lineas dentro de `<configuration>`:
 ```xml
+
+<property>
+  <name>fs.defaultFS</name>
+  <!--value>hdfs://localhost:9000</value-->
+  <value>hdfs://hadoop-master:9000</value>
+</property>
+<property>
+  <name>fs.defaultFS</name>
+  <value>hdfs://namenode:8020</value>
+</property>
+
 <property>
   <name>hadoop.proxyuser.hadoop.hosts</name>
   <value>*</value>
@@ -327,10 +303,11 @@ Abre en tu nodo maestro (donde está Hadoop) y agregar las lineas dentro de `<co
   <value>*</value>
 </property>
 
-<property>
-  <name>hive.server2.thrift.port</name>
-  <value>10000</value>
-</property>
+  <!-- (Opcional) ubicación del directorio temporal -->
+  <property>
+    <name>hadoop.tmp.dir</name>
+    <value>/opt/hadoop/tmp</value>
+  </property>
 
 ```
 🔹2️⃣ Guarda y reinicia los servicios de Hadoop y Hive
@@ -349,7 +326,7 @@ start-dfs.sh
 start-yarn.sh
 hive --service hiveserver2 &
 ```
-### 3️⃣ Iniciar la conexión en una terminal
+### 3️⃣ Abrir una `Nueva Ventana` de Terminal para realizar la conexión
 Acceso Localhost:
 ```bash
 beeline -u jdbc:hive2://localhost:10000 -n hadoop -p --verbose=true
@@ -603,7 +580,7 @@ VALUES (1, 'Jaime', 'Sistemas', 3113.15, '2026-01-08');
 ```sql
 INSERT INTO TABLE empleados
 PARTITION (anio=2026, mes=1)
-VALUES (2, 'Diana', 'Administradora', 2013.15, '2026-01-08');
+VALUES (5, 'Pepito', 'Administradora', 2013.15, '2026-01-08');
 ```
 
 # 16. Soluciones de Permisos de Escritura
