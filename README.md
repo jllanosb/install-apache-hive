@@ -434,14 +434,14 @@ Listar bases de datos:
 ```sql
 SHOW DATABASES;
 ```
-Crear y Activar uso de base de datos `BIGDATA` :
+Crear y Activar uso de base de datos `test_db` :
 ```sql
-CREATE DATABASE IF NOT EXISTS BIGDATA;
-USE BIGDATA;
+CREATE DATABASE IF NOT EXISTS test_db;
+USE test_db;
 ```
 Crear una tabla en la base de datos tipo `TextFile`:
 ```sql
-CREATE TABLE PERSONA (id INT, name STRING)
+CREATE TABLE test_db.PERSONA (id INT, name STRING)
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY '|'
 LINES TERMINATED BY '\n'
@@ -450,16 +450,16 @@ STORED AS TEXTFILE;
 
 Verificar la tabla creada
 ```sql
-SHOW TABLES IN BIGDATA;
+SHOW TABLES IN test_db;
 ```
 Descripción de las columnas y sus tipos de datos.
 ```sql
-DESC BIGDATA.PERSONA;
+DESC test_db.PERSONA;
 ```
 
 Descripción más detallada de la tabla
 ```sql
-DESC FORMATTED BIGDATA.PERSONA;
+DESC FORMATTED test_db.PERSONA;
 ```
 
 Habilitar `Permisos en HDFS de acceso ala base de datos para el usuario Hive`
@@ -485,19 +485,19 @@ hive --service hiveserver2 &
 
 Insertar un registro de modo tradicional (Hive trabaja formatos ORC, PARQUET, Avro en produccion):
 ```sql
-INSERT INTO test_db.test_table VALUES (1, 'Jaime');
+INSERT INTO test_db.PERSONA VALUES (1, 'Jaime');
 -- Generará errores
 ```
 Consultar registros:
 ```sql
-SELECT * FROM test_db.test_table;
+SELECT * FROM test_db.PERSONA;
 ```
 Eliminar base de datos y todas las tablas:
 ```sql
 DROP DATABASE test_db CASCADE;
 ```
 
-# 15. Tabla en produccion
+# 15. Tabla en produccion formato `ORC`
 Crear base de datos, poner uso, crear tabla particionada:
 ```sql
 CREATE DATABASE IF NOT EXISTS BIGDATA
@@ -548,8 +548,249 @@ Consultar registros:
 ```sql
 SELECT * FROM empleados;
 ```
+# 16. Creando Tabla CARRERA en formato `PARQUET`
+1. Crear tabla carrera en formato Parquet
+```sql
+-- Usar la base de datos BIGDATA
+USE BIGDATA;
 
-# 16. Soluciones de Permisos de Escritura (Test)
+-- Crear tabla carrera en formato Parquet
+CREATE TABLE IF NOT EXISTS carrera (
+    id_carrera INT,
+    nombre_carrera STRING,
+    facultad STRING,
+    duracion_anios INT,
+    creditos_totales INT,
+    fecha_creacion DATE,
+    activa BOOLEAN
+)
+PARTITIONED BY (
+    anio INT,
+    mes INT
+)
+STORED AS PARQUET
+TBLPROPERTIES (
+    'parquet.compression'='SNAPPY',  -- Compresión
+    'parquet.block.size'='134217728' -- Tamaño de bloque 128MB
+);
+```
+2. Verificar la tabla creada
+```sql
+-- Ver estructura
+DESCRIBE FORMATTED carrera;
+
+-- Ver tablas en la base de datos
+SHOW TABLES;
+```
+3. Métodos para insertar datos
+
+Método 1: INSERT con VALUES (directo)
+```sql
+INSERT INTO TABLE carrera
+PARTITION (anio=2026, mes=1)
+VALUES (
+    1, 
+    'Ingeniería de Sistemas', 
+    'Facultad de Ingeniería', 
+    5, 
+    220, 
+    '2020-01-15', 
+    TRUE
+);
+```
+Método 2: INSERT múltiple con VALUES
+```sql
+INSERT INTO TABLE carrera
+PARTITION (anio=2026, mes=1)
+VALUES 
+    (1, 'Ingeniería de Sistemas', 'Facultad de Ingeniería', 5, 220, '2020-01-15', TRUE),
+    (2, 'Medicina', 'Facultad de Medicina', 7, 350, '2018-08-01', TRUE),
+    (3, 'Administración', 'Facultad de Ciencias Económicas', 5, 200, '2019-03-10', TRUE);
+```
+Método 3: INSERT con SELECT (recomendado)
+```sql
+INSERT INTO TABLE carrera
+PARTITION (anio=2026, mes=1)
+SELECT 
+    1 as id_carrera,
+    'Ingeniería de Sistemas' as nombre_carrera,
+    'Facultad de Ingeniería' as facultad,
+    5 as duracion_anios,
+    220 as creditos_totales,
+    '2020-01-15' as fecha_creacion,
+    TRUE as activa
+FROM (SELECT 1) tmp;  -- Tabla dummy para generar una fila
+```
+Método 4: INSERT dinámico con particiones variables
+```sql
+-- Habilitar particiones dinámicas
+SET hive.exec.dynamic.partition=true;
+SET hive.exec.dynamic.partition.mode=nonstrict;
+
+INSERT INTO TABLE carrera
+PARTITION (anio, mes)
+SELECT 
+    1, 'Ingeniería de Sistemas', 'Facultad de Ingeniería', 5, 220, '2020-01-15', TRUE,
+    2026, 1
+FROM (SELECT 1) tmp;
+```
+5. Consultar datos insertados
+```sql
+-- Ver todos los datos
+SELECT * FROM carrera;
+
+-- Ver por partición específica
+SELECT * FROM carrera WHERE anio=2026 AND mes=1;
+```
+
+# 17. Creando Tabla ALUMNO en formato `PARQUET`
+1. Crear tabla carrera en formato Parquet
+```sql
+-- Usar la base de datos BIGDATA
+USE BIGDATA;
+
+-- Opción 1: Tabla básica con particiones
+CREATE TABLE IF NOT EXISTS alumno (
+    id_alumno INT,
+    nombre STRING,
+    apellido STRING,
+    dni STRING,
+    fecha_nacimiento DATE,
+    correo STRING,
+    telefono STRING,
+    direccion STRING,
+    id_carrera INT,
+    semestre_actual INT,
+    promedio DECIMAL(4,2),
+    estado STRING  -- 'ACTIVO', 'INACTIVO', 'EGRESADO', etc.
+)
+PARTITIONED BY (
+    anio_ingreso INT,
+    semestre_ingreso INT
+)
+STORED AS PARQUET
+TBLPROPERTIES (
+    'parquet.compression'='SNAPPY',
+    'comment'='Tabla de alumnos en formato Parquet'
+);
+```
+Opción 2: Con más restricciones y optimizaciones
+```sql
+CREATE TABLE IF NOT EXISTS alumno (
+    id_alumno INT COMMENT 'Identificador único del alumno',
+    nombre STRING COMMENT 'Nombre del alumno',
+    apellido STRING COMMENT 'Apellido del alumno',
+    dni STRING COMMENT 'Documento Nacional de Identidad',
+    fecha_nacimiento DATE COMMENT 'Fecha de nacimiento',
+    correo STRING COMMENT 'Correo electrónico',
+    telefono STRING COMMENT 'Número de teléfono',
+    direccion STRING COMMENT 'Dirección de residencia',
+    id_carrera INT COMMENT 'ID de la carrera que estudia',
+    semestre_actual INT COMMENT 'Semestre actual que cursa',
+    promedio DECIMAL(4,2) COMMENT 'Promedio académico',
+    estado STRING COMMENT 'Estado: ACTIVO, INACTIVO, EGRESADO'
+)
+PARTITIONED BY (
+    anio_ingreso INT COMMENT 'Año de ingreso a la universidad',
+    semestre_ingreso INT COMMENT 'Semestre de ingreso (1 o 2)'
+)
+CLUSTERED BY (id_carrera) INTO 4 BUCKETS  -- Opcional: bucketing por carrera
+STORED AS PARQUET
+TBLPROPERTIES (
+    'parquet.compression'='SNAPPY',
+    'parquet.block.size'='268435456',  -- 256MB
+    'parquet.page.size'='1048576',     -- 1MB
+    'transactional'='false'
+);
+```
+Opción 3: Tabla sin particiones (más simple)
+```sql
+CREATE TABLE IF NOT EXISTS alumno_simple (
+    id_alumno INT,
+    nombre STRING,
+    apellido STRING,
+    dni STRING,
+    fecha_nacimiento DATE,
+    id_carrera INT,
+    anio_ingreso INT,
+    semestre_ingreso INT
+)
+STORED AS PARQUET;
+```
+3. Verificar la creación
+```sql
+-- Ver estructura detallada
+DESCRIBE FORMATTED alumno;
+
+-- Ver solo columnas
+DESCRIBE alumno;
+
+-- Ver tablas en la base de datos
+SHOW TABLES LIKE 'alumno*';
+```
+4. Insertar datos - Diferentes métodos:
+
+Método 1: INSERT simple con VALUES
+```sql
+-- Configurar para mejor rendimiento
+SET hive.exec.dynamic.partition=true;
+SET hive.exec.dynamic.partition.mode=nonstrict;
+
+INSERT INTO TABLE alumno
+PARTITION (anio_ingreso=2026, semestre_ingreso=1)
+VALUES (
+    1,
+    'Juan',
+    'Pérez',
+    '12345678',
+    '2000-05-15',
+    'juan.perez@email.com',
+    '999888777',
+    'Av. Siempre Viva 123',
+    1,  -- id_carrera (Ing. Sistemas)
+    3,  -- semestre_actual
+    15.5,
+    'ACTIVO'
+);
+```
+Método 2: INSERT múltiple con VALUES
+```sql
+INSERT INTO TABLE alumno
+PARTITION (anio_ingreso=2026, semestre_ingreso=1)
+VALUES 
+    (1, 'Juan', 'Pérez', '12345678', '2000-05-15', 'juan@email.com', '999888777', 'Av. 123', 1, 3, 15.5, 'ACTIVO'),
+    (2, 'María', 'Gómez', '87654321', '2001-03-20', 'maria@email.com', '999777666', 'Calle 456', 2, 5, 16.8, 'ACTIVO'),
+    (3, 'Carlos', 'López', '11223344', '1999-11-10', 'carlos@email.com', '999666555', 'Jr. 789', 1, 7, 14.2, 'ACTIVO');
+```
+Método 3: INSERT con SELECT (recomendado)
+```sql
+INSERT INTO TABLE alumno
+PARTITION (anio_ingreso, semestre_ingreso)
+SELECT 
+    1 as id_alumno,
+    'Ana' as nombre,
+    'Torres' as apellido,
+    '55667788' as dni,
+    '2002-08-25' as fecha_nacimiento,
+    'ana@email.com' as correo,
+    '999555444' as telefono,
+    'Av. Universitaria 456' as direccion,
+    3 as id_carrera,  -- Administración
+    2 as semestre_actual,
+    17.3 as promedio,
+    'ACTIVO' as estado,
+    2025 as anio_ingreso,  -- Esta columna va a la partición
+    2 as semestre_ingreso  -- Esta columna va a la partición
+FROM (SELECT 1) tmp;  -- Tabla dummy para generar una fila
+```
+
+5. Consultar datos
+```sql
+-- Ver todos los alumnos
+SELECT * FROM alumno LIMIT 10;
+```
+
+# 18. Soluciones de Permisos de Escritura (Test)
 
 Solucion individual:
 ```bash
