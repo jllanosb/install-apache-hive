@@ -55,7 +55,7 @@ Opcion A. Autenticarse usuario Hadoop en mismo servidor:
 ```bash
 sudo su - hadoop
 ```
-Opcion B. Autenticarse usuario Hadoop en mismo servidor:
+Opcion B. Autenticarse usuario Hadoop con `SSH` e IP:
 ```bash
 ssh hadoop@172.29.96.93
 ```
