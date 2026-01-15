@@ -49,6 +49,22 @@ Almacenamiento: HDFS / S3 / ADLS / GCS
 5. **Apache Hive** (Binarios)
 6. **Variables de Entorno** (Críticas)
 
+# Iniciar Servicios Hadoop y Yarn
+
+Opcion A. Autenticarse usuario Hadoop en mismo servidor:
+```bash
+sudo su - hadoop
+```
+Opcion B. Autenticarse usuario Hadoop en mismo servidor:
+```bash
+ssh hadoop@172.29.96.93
+```
+Una vez autenticado ya sea en el servidor o via SSH, Iniciar servicios:
+```bash
+start-dfs.sh
+start-yarn.sh
+```
+
 # 1. Instalar PostgreSQL (Ubuntu 24.04)
 Actualizar Ubuntu e Instalar PosgreSQL
 ```bash
@@ -66,7 +82,7 @@ CREATE USER hiveuser WITH PASSWORD 'HivePassword123';
 GRANT ALL PRIVILEGES ON DATABASE hive_metastore TO hiveuser;
 \q
 ```
-## ERROR: permission denied for schema public
+## Agregar Permisos al Schema Public
 
 ### 🧭 Paso 1: Conéctate a PostgreSQL 
 
@@ -280,14 +296,13 @@ hdfs dfs -chown -R hive:hadoop /user/hive/warehouse
 hdfs dfs -chmod -R 777 /user/hive/warehouse
 ```
 
-# 9. Iniciar Hive
+# 9. Probar Inicia Hive
 Iniciar Servicio
 ```bash
-# hive --service metastore
 hive --service hiveserver2 &
 ```
 
-# 10. Configurar Hive con Beeline
+# 10. Configurar Hive con Beeline (CLI)
 
 🔹1️⃣ Edita el archivo `core-site.xml`
 ```bash
@@ -312,22 +327,6 @@ Abre en tu nodo maestro (donde está Hadoop) y agregar las lineas dentro de `<co
     <value>/opt/hadoop/tmp</value>
   </property>
 
-```
-🔹2️⃣ Guarda y reinicia los servicios de Hadoop y Hive
-
-Ejecuta en el servidor:
-```bash
-stop-yarn.sh
-stop-dfs.sh
-
-# Si HiveServer2 está en ejecución:
-pkill -f HiveServer2
-```
-Luego reinicia todo:
-```bash
-start-dfs.sh
-start-yarn.sh
-hive --service hiveserver2 &
 ```
 
 # 11. Configurar Beeline para conexion externa
@@ -391,10 +390,6 @@ sudo wget https://repo1.maven.org/maven2/org/apache/commons/commons-collections4
  
 🔹🔁 Paso 3: Vuelve a iniciar el Metastore 
 
-Primero, asegúrate de que no haya procesos anteriores: 
-```bash
-pkill -f HiveMetaStore
-```
 Luego inicia el Metastore: 
 ```bash
 hive --service metastore &
@@ -410,6 +405,25 @@ Deberías ver algo como:
 commons-collections-3.2.2.jar
 commons-collections4-4.4.jar
 ``` 
+## 2️⃣ REINICIAR SERVICIOS DE `HADOOP` Y `HIVE`
+
+Detener servicios en el servidor:
+```bash
+stop-yarn.sh
+stop-dfs.sh
+
+# Si HiveServer2 está en ejecución:
+pkill -f HiveServer2
+pkill -f HiveMetaStore
+```
+Luego reinicia todo:
+```bash
+start-dfs.sh
+start-yarn.sh
+pkill -f HiveMetaStore &
+sleep 10
+hive --service hiveserver2 &
+```
 # 13. Acceder a Hive `Abrir una Nueva Ventana` de Terminal para realizar la conexión
 Acceso Localhost:
 ```bash
@@ -813,8 +827,9 @@ pkill -f HiveMetaStore
 pkill -f HiveServer2
 
 # Iniciar nuevamente servicios
-hive --service hiveserver2 &
 hive --service metastore &
+sleep 10
+hive --service hiveserver2 &
 ```
 
 `Nota`: En Produccion se usa el permiso `775` 
