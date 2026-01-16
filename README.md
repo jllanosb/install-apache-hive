@@ -420,7 +420,7 @@ Luego reinicia todo:
 ```bash
 start-dfs.sh
 start-yarn.sh
-pkill -f HiveMetaStore &
+hive --service metastore &
 sleep 10
 hive --service hiveserver2 &
 ```
