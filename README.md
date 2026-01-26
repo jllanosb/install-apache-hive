@@ -1,4 +1,4 @@
-# INSTALACIÓN DE APACHE HIVE + METASTORE EN POSTGRESQL
+# INSTALACIÓN DE APACHE HIVE 3.1.3 + METASTORE EN POSTGRESQL 18
 
 Apache Hive es un sistema de data warehouse construido sobre Apache Hadoop, diseñado para facilitar la consulta, análisis y procesamiento de grandes volúmenes de datos almacenados en sistemas distribuidos (como HDFS, Amazon S3, Azure Data Lake, etc.).
 
@@ -68,9 +68,36 @@ start-yarn.sh
 # 1. Instalar PostgreSQL (Ubuntu 24.04)
 Actualizar Ubuntu e Instalar PosgreSQL
 ```bash
-sudo apt update
-sudo apt install postgresql postgresql-contrib -y
+sudo apt update && sudo apt upgrade -y
 ```
+Instala dependencias necesarias
+```bash
+sudo apt install wget ca-certificates gnupg
+```
+Agrega la clave GPG del repositorio de PostgreSQL
+```bash
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | \
+  sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+```
+Agrega el repositorio oficial de PostgreSQL
+```bash
+echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | \
+  sudo tee /etc/apt/sources.list.d/pgdg.list
+```
+Actualiza e instala PostgreSQL 18
+```bash
+sudo apt update
+sudo apt install postgresql-18 postgresql-client-18
+```
+Verifica la instalación
+```bash
+sudo systemctl status postgresql
+```
+verificar la versión
+```bash
+psql --version
+```
+### Crear usuario para hive
 Crear usuario y BD para metastore Hive:
 ```bash
 sudo -u postgres psql
