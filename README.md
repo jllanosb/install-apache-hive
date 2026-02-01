@@ -479,12 +479,12 @@ SHOW DATABASES;
 Crear y Activar uso de base de datos `test_db` :
 ```sql
 CREATE DATABASE IF NOT EXISTS test_db
-LOCATION '/user/hive//warehouse/test_db';
+LOCATION '/user/hive/warehouse/test_db';
 USE test_db;
 ```
 Crear una tabla en la base de datos tipo `TextFile`:
 ```sql
-CREATE TABLE test_db.PERSONA (id INT, name STRING)
+CREATE TABLE test_db.persona (id INT, name STRING)
 ROW FORMAT DELIMITED
 FIELDS TERMINATED BY '|'
 LINES TERMINATED BY '\n'
@@ -497,22 +497,22 @@ SHOW TABLES IN test_db;
 ```
 Descripción de las columnas y sus tipos de datos.
 ```sql
-DESC test_db.PERSONA;
+DESC test_db.persona;
 ```
 
 Descripción más detallada de la tabla
 ```sql
-DESC FORMATTED test_db.PERSONA;
+DESC FORMATTED test_db.persona;
 ```
 
 Insertar un registro de modo tradicional (Hive trabaja formatos ORC, PARQUET, Avro en produccion):
 ```sql
-INSERT INTO test_db.PERSONA VALUES (1, 'Jaime');
+INSERT INTO test_db.persona VALUES (1, 'Jaime');
 -- Generará errores
 ```
 Consultar registros:
 ```sql
-SELECT * FROM test_db.PERSONA;
+SELECT * FROM test_db.persona;
 ```
 Eliminar base de datos y todas las tablas:
 ```sql
@@ -522,12 +522,12 @@ DROP DATABASE test_db CASCADE;
 # 15. Tabla en produccion formato `ORC`
 Crear base de datos, poner uso, crear tabla particionada:
 ```sql
-CREATE DATABASE IF NOT EXISTS BIGDATA
-LOCATION '/user/hive//warehouse/BIGDATA';
+CREATE DATABASE IF NOT EXISTS bigdata
+LOCATION '/user/hive/warehouse/bigdata';
 
-USE BIGDATA;
+USE bigdata;
 
-CREATE TABLE IF NOT EXISTS empleados (
+CREATE TABLE IF NOT EXISTS bigdata.empleados (
     id_empleado        INT,
     nombre             STRING,
     departamento       STRING,
@@ -544,14 +544,23 @@ TBLPROPERTIES (
     'transactional'='false'
 );
 ```
+
+```bash
+SET hive.exec.dynamic.partition=true;
+SET hive.exec.dynamic.partition.mode=nonstrict;
+# Por si hubiera errores de memoria
+SET hive.exec.max.dynamic.partitions=1000;
+SET hive.exec.max.dynamic.partitions.pernode=100;
+```
+
 Habilitar `Permisos en HDFS de acceso ala base de datos para el usuario Hive`
 
 Asinar y verificar permisos en HDFS: 
 ```bash
-hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/BIGDATA.db
-hdfs dfs -chown -R hadoop:hadoop /user/hive/warehouse/BIGDATA.db
-hdfs dfs -chmod -R 777 /user/hive/warehouse/BIGDATA.db
-hdfs dfs -ls /user/hive/warehouse/BIGDATA.db
+hdfs dfs -chown -R hadoop:hadoop /user/hive/warehouse/bigdata.db
+hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/bigdata.db
+hdfs dfs -chmod -R 777 /user/hive/warehouse/bigdata.db
+hdfs dfs -ls /user/hive/warehouse/bigdata.db
 ```
 
 Reiniciar servicios:
@@ -568,37 +577,37 @@ hive --service hiveserver2 &
 
 Cargar Datos:
 ```sql
-INSERT INTO TABLE empleados
+INSERT INTO TABLE bigdata.empleados
 PARTITION (anio=2026, mes=1)
 VALUES (1, 'Jaime', 'Sistemas', 3113.15, '2026-01-08');
 ```
 ```sql
-INSERT INTO TABLE empleados
+INSERT INTO TABLE bigdata.empleados
 PARTITION (anio=2026, mes=1)
 VALUES (2, 'Diana', 'Administradora', 2013.15, '2026-01-09');
 ```
 ```sql
-INSERT INTO TABLE empleados
+INSERT INTO TABLE bigdata.empleados
 PARTITION (anio=2026, mes=1)
 VALUES (3, 'Susana', 'Cajera', 2013.15, '2026-01-10');
 ```
 ```sql
-INSERT INTO TABLE empleados
+INSERT INTO TABLE bigdata.empleados
 PARTITION (anio=2026, mes=1)
 VALUES (4, 'Iris', 'Secretaria', 2013.15, '2026-01-07');
 ```
 Consultar registros:
 ```sql
-SELECT * FROM empleados;
+SELECT * FROM bigdata.empleados;
 ```
 # 16. Creando Tabla CARRERA en formato `PARQUET`
 1. Crear tabla carrera en formato Parquet
 ```sql
 -- Usar la base de datos BIGDATA
-USE BIGDATA;
+USE bigdata;
 
 -- Crear tabla carrera en formato Parquet
-CREATE TABLE IF NOT EXISTS carrera (
+CREATE TABLE IF NOT EXISTS bigdata.carrera (
     id_carrera INT,
     nombre_carrera STRING,
     facultad STRING,
@@ -620,7 +629,7 @@ TBLPROPERTIES (
 2. Verificar la tabla creada
 ```sql
 -- Ver estructura
-DESCRIBE FORMATTED carrera;
+DESCRIBE FORMATTED bigdata.carrera;
 
 -- Ver tablas en la base de datos
 SHOW TABLES;
@@ -629,7 +638,7 @@ SHOW TABLES;
 
 Método 1: INSERT con VALUES (directo)
 ```sql
-INSERT INTO TABLE carrera
+INSERT INTO TABLE bigdata.carrera
 PARTITION (anio=2026, mes=1)
 VALUES (
     1, 
@@ -643,7 +652,7 @@ VALUES (
 ```
 Método 2: INSERT múltiple con VALUES
 ```sql
-INSERT INTO TABLE carrera
+INSERT INTO TABLE bigdata.carrera
 PARTITION (anio=2026, mes=1)
 VALUES 
     (1, 'Ingeniería de Sistemas', 'Facultad de Ingeniería', 5, 220, '2020-01-15', TRUE),
@@ -652,7 +661,7 @@ VALUES
 ```
 Método 3: INSERT con SELECT (recomendado)
 ```sql
-INSERT INTO TABLE carrera
+INSERT INTO TABLE bigdata.carrera
 PARTITION (anio=2026, mes=1)
 SELECT 
     1 as id_carrera,
@@ -670,7 +679,7 @@ Método 4: INSERT dinámico con particiones variables
 SET hive.exec.dynamic.partition=true;
 SET hive.exec.dynamic.partition.mode=nonstrict;
 
-INSERT INTO TABLE carrera
+INSERT INTO TABLE bigdata.carrera
 PARTITION (anio, mes)
 SELECT 
     1, 'Ingeniería de Sistemas', 'Facultad de Ingeniería', 5, 220, '2020-01-15', TRUE,
@@ -680,20 +689,20 @@ FROM (SELECT 1) tmp;
 5. Consultar datos insertados
 ```sql
 -- Ver todos los datos
-SELECT * FROM carrera;
+SELECT * FROM bigdata.carrera;
 
 -- Ver por partición específica
-SELECT * FROM carrera WHERE anio=2026 AND mes=1;
+SELECT * FROM bigdata.carrera WHERE anio=2026 AND mes=1;
 ```
 
 # 17. Creando Tabla ALUMNO en formato `PARQUET`
 1. Crear tabla carrera en formato Parquet
 ```sql
 -- Usar la base de datos BIGDATA
-USE BIGDATA;
+USE bigdata;
 
 -- Opción 1: Tabla básica con particiones
-CREATE TABLE IF NOT EXISTS alumno (
+CREATE TABLE IF NOT EXISTS bigdata.alumno (
     id_alumno INT,
     nombre STRING,
     apellido STRING,
@@ -719,7 +728,7 @@ TBLPROPERTIES (
 ```
 Opción 2: Con más restricciones y optimizaciones
 ```sql
-CREATE TABLE IF NOT EXISTS alumno (
+CREATE TABLE IF NOT EXISTS bigdata.alumno (
     id_alumno INT COMMENT 'Identificador único del alumno',
     nombre STRING COMMENT 'Nombre del alumno',
     apellido STRING COMMENT 'Apellido del alumno',
@@ -748,7 +757,7 @@ TBLPROPERTIES (
 ```
 Opción 3: Tabla sin particiones (más simple)
 ```sql
-CREATE TABLE IF NOT EXISTS alumno_simple (
+CREATE TABLE IF NOT EXISTS bigdata.alumno_simple (
     id_alumno INT,
     nombre STRING,
     apellido STRING,
@@ -779,7 +788,7 @@ Método 1: INSERT simple con VALUES
 SET hive.exec.dynamic.partition=true;
 SET hive.exec.dynamic.partition.mode=nonstrict;
 
-INSERT INTO TABLE alumno
+INSERT INTO TABLE bigdata.alumno
 PARTITION (anio_ingreso=2026, semestre_ingreso=1)
 VALUES (
     1,
@@ -798,7 +807,7 @@ VALUES (
 ```
 Método 2: INSERT múltiple con VALUES
 ```sql
-INSERT INTO TABLE alumno
+INSERT INTO TABLE bigdata.alumno
 PARTITION (anio_ingreso=2026, semestre_ingreso=1)
 VALUES 
     (1, 'Juan', 'Pérez', '12345678', '2000-05-15', 'juan@email.com', '999888777', 'Av. 123', 1, 3, 15.5, 'ACTIVO'),
@@ -807,7 +816,7 @@ VALUES
 ```
 Método 3: INSERT con SELECT (recomendado)
 ```sql
-INSERT INTO TABLE alumno
+INSERT INTO TABLE bigdata.alumno
 PARTITION (anio_ingreso, semestre_ingreso)
 SELECT 
     1 as id_alumno,
@@ -830,20 +839,20 @@ FROM (SELECT 1) tmp;  -- Tabla dummy para generar una fila
 5. Consultar datos
 ```sql
 -- Ver todos los alumnos
-SELECT * FROM alumno LIMIT 10;
+SELECT * FROM bigdata.alumno LIMIT 10;
 ```
 
 # 18. Soluciones de Permisos de Escritura (Test)
 
 Solucion individual:
 ```bash
-hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/BASEDEDATOSCREADA.db
-hdfs dfs -chown -R hadoop:hadoop /user/hive/warehouse/BASEDEDATOSCREADA.db
-hdfs dfs -chmod -R 777 /user/hive/warehouse/BASEDEDATOSCREADA.db
+hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/basededatoscreada.db
+hdfs dfs -chown -R hadoop:hadoop /user/hive/warehouse/basededatoscreada.db
+hdfs dfs -chmod -R 777 /user/hive/warehouse/basededatoscreada.db
 ```
 Verificar:
 ```bash
-hdfs dfs -ls /user/hive/warehouse/BASEDEDATOSCREADA.db
+hdfs dfs -ls /user/hive/warehouse/basededatoscreada.db
 ```
 Se visualiza asi `hive hadoop ...`:
 ```
