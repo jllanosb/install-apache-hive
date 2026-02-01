@@ -478,7 +478,8 @@ SHOW DATABASES;
 ```
 Crear y Activar uso de base de datos `test_db` :
 ```sql
-CREATE DATABASE IF NOT EXISTS test_db;
+CREATE DATABASE IF NOT EXISTS test_db
+LOCATION '/user/hive//warehouse/test_db';
 USE test_db;
 ```
 Crear una tabla en la base de datos tipo `TextFile`:
