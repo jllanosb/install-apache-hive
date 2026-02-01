@@ -320,6 +320,7 @@ hdfs dfs -chmod -R 777 /tmp/hive
 Asignando Permisos:
 ```bash
 hdfs dfs -chown -R hive:hadoop /user/hive/warehouse
+hdfs dfs -chown -R hadoop:hadoop /user/hive/warehouse
 hdfs dfs -chmod -R 777 /user/hive/warehouse
 ```
 
@@ -503,27 +504,6 @@ Descripción más detallada de la tabla
 DESC FORMATTED test_db.PERSONA;
 ```
 
-Habilitar `Permisos en HDFS de acceso ala base de datos para el usuario Hive`
-
-Asinar y verificar permisos: 
-```bash
-hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/BIGDATA.db
-hdfs dfs -chmod -R 777 /user/hive/warehouse/BIGDATA.db
-hdfs dfs -ls /user/hive/warehouse/BIGDATA.db
-```
-
-Reiniciar servicios:
-```bash
-# Detener
-pkill -f HiveMetaStore
-pkill -f HiveServer2
-
-# Iniciar nuevamente servicios
-hive --service metastore &
-sleep 10
-hive --service hiveserver2 &
-```
-
 Insertar un registro de modo tradicional (Hive trabaja formatos ORC, PARQUET, Avro en produccion):
 ```sql
 INSERT INTO test_db.PERSONA VALUES (1, 'Jaime');
@@ -542,7 +522,7 @@ DROP DATABASE test_db CASCADE;
 Crear base de datos, poner uso, crear tabla particionada:
 ```sql
 CREATE DATABASE IF NOT EXISTS BIGDATA
-LOCATION '/data/hive//warehouse/BIGDATA';
+LOCATION '/user/hive//warehouse/BIGDATA';
 
 USE BIGDATA;
 
@@ -562,6 +542,27 @@ TBLPROPERTIES (
     'orc.compress'='SNAPPY',
     'transactional'='false'
 );
+```
+Habilitar `Permisos en HDFS de acceso ala base de datos para el usuario Hive`
+
+Asinar y verificar permisos en HDFS: 
+```bash
+hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/BIGDATA.db
+hdfs dfs -chown -R hadoop:hadoop /user/hive/warehouse/BIGDATA.db
+hdfs dfs -chmod -R 777 /user/hive/warehouse/BIGDATA.db
+hdfs dfs -ls /user/hive/warehouse/BIGDATA.db
+```
+
+Reiniciar servicios:
+```bash
+# Detener
+pkill -f HiveMetaStore
+pkill -f HiveServer2
+
+# Iniciar nuevamente servicios
+hive --service metastore &
+sleep 10
+hive --service hiveserver2 &
 ```
 
 Cargar Datos:
@@ -836,6 +837,7 @@ SELECT * FROM alumno LIMIT 10;
 Solucion individual:
 ```bash
 hdfs dfs -chown -R hive:hadoop /user/hive/warehouse/BASEDEDATOSCREADA.db
+hdfs dfs -chown -R hadoop:hadoop /user/hive/warehouse/BASEDEDATOSCREADA.db
 hdfs dfs -chmod -R 777 /user/hive/warehouse/BASEDEDATOSCREADA.db
 ```
 Verificar:
