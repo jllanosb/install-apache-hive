@@ -1,4 +1,4 @@
-# INSTALACIÓN DE APACHE HIVE 3.1.3 + METASTORE EN POSTGRESQL 18
+# INSTALACIÓN DE APACHE HIVE 4.1.0 + METASTORE EN POSTGRESQL 18
 
 Apache Hive es un sistema de data warehouse construido sobre Apache Hadoop, diseñado para facilitar la consulta, análisis y procesamiento de grandes volúmenes de datos almacenados en sistemas distribuidos (como HDFS, Amazon S3, Azure Data Lake, etc.).
 
@@ -37,16 +37,14 @@ Almacenamiento: HDFS / S3 / ADLS / GCS
 
 # Requisitos
 
-1. **Sistema Operativo Ubuntu** 20.04 / 22.04 / 24.04 / 25.10 (Linux, macOS, Windows con WSL)
+1. **Sistema Operativo Ubuntu** 22.04 / 24.04 / 25.10 / 26.04 (Linux, macOS, Windows con WSL)
 2. **JDK 8**
 
-- Hive 2.x --> JDK 8
-- Hive 3.x --> JDK 8 o 11
-- Hive 4.x (2024–2025) --> JDK 11 o 17 (recomendado: JDK 17 LTS)
+- Hive 4.x (2025–2026) --> JDK 17 (Opcional: JDK 21 LTS)
 
-3. **Hadoop (HDFS + YARN)** [Instalar Apache Hadoop 3.4.2](https://github.com/jllanosb/install-apache-hadoop)
+3. **Hadoop (HDFS + YARN)** [Instalar Apache Hadoop 3.5.0](https://github.com/jllanosb/install-apache-hadoop)
 
-- Hadoop --> 3.3.x o superior (Hive 4.x requiere Hadoop ≥ 3.3)
+- Hadoop --> 3.5.x o superior (Hive 4.x requiere Hadoop ≥ 3.5)
 - HDFS --> Debe estar en ejecución y accesible (hdfs dfs -ls /)
 - YARN --> Necesario para ejecutar trabajos (MapReduce/Tez/Spark)
 
@@ -200,15 +198,15 @@ Salir de `psql`:
 \q
 ```
 
-# 2. Descargar Apache Hive 3.1.3
+# 2. Descargar Apache Hive 4.1.0
 
-Hive 3.1.3 (estable para enterprise productivo real con Java 11). [Consulta nuevas versiones](https://hive.apache.org/general/downloads/)
+Hive 4.1.0 (estable para enterprise productivo real con Java 17). [Consulta nuevas versiones](https://hive.apache.org/general/downloads/)
 
 ```bash
 cd /tmp
-sudo wget https://archive.apache.org/dist/hive/hive-3.1.3/apache-hive-3.1.3-bin.tar.gz
+sudo wget https://archive.apache.org/dist/hive/hive-4.1.3/apache-hive-4.1.0-bin.tar.gz
 sudo mkdir -p /opt/hive
-sudo tar -xzf apache-hive-3.1.3-bin.tar.gz -C /opt/hive --strip-components=1
+sudo tar -xzf apache-hive-4.1.0-bin.tar.gz -C /opt/hive --strip-components=1
 sudo chown -R hadoop:hadoop /opt/hive
 ```
 
@@ -243,7 +241,7 @@ hive --version
 Resultado de la version:
 
 ```txt
-Hive 3.1.3
+Hive 4.1.0
 Git git://MacBook-Pro.fios-router.home/Users/ngangam/commit/hive -r 4df4d75bf1e16fe0af75aad0b4179c34c07fc975
 Compiled by ngangam on Sun Apr 3 16:58:16 EDT 2022
 From source with checksum 5da234766db5dfbe3e92926c9bbab2af
@@ -255,8 +253,8 @@ Descargar version mas compatible.
 
 ```bash
 cd /opt/hive/lib
-wget https://jdbc.postgresql.org/download/postgresql-42.7.3.jar
-sudo chown hadoop:hadoop postgresql-42.7.3.jar
+wget https://jdbc.postgresql.org/download/postgresql-42.7.14.jar
+sudo chown hadoop:hadoop postgresql-42.7.14.jar
 ```
 
 # 5. Configuración Hive Metastore
@@ -305,18 +303,20 @@ Agregar las Lineas:
 </configuration>
 ```
 
-# 6. Habilitar Java 8
+# 6. Habilitar Java 17 (Solo si no esta instalado)
 
-## 🔹 Paso 1: Instalar OpenJDK 8
+`Nota`: Debe estar instalado anteriormente al instalar Hadoop 3.5.0
+
+## 🔹 Paso 1: Instalar OpenJDK 17
 
 En Ubuntu/Debian:
 
 ```bash
 sudo apt update
-sudo apt install openjdk-8-jdk -y
+sudo apt install openjdk-17-jdk -y
 ```
 
-## 🔹Paso 2: Configurar Hive y Hadoop para usar Java 8
+## 🔹Paso 2: Configurar Hive y Hadoop para usar Java 17
 
 Verifica qué versiones de Java tienes:
 
@@ -324,7 +324,7 @@ Verifica qué versiones de Java tienes:
 sudo update-alternatives --config java
 ```
 
-Selecciona la opción que apunte a Java 8 (normalmente `/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java`).
+Selecciona la opción que apunte a Java 17 (normalmente `/usr/lib/jvm/java-17-openjdk-amd64/jre/bin/java`).
 
 También puedes exportar la ruta manualmente en tu entorno:
 
@@ -335,8 +335,8 @@ sudo nano ~/.bashrc
 Para hacerlo permanente, agrega esas líneas a tu archivo:
 
 ```bash
-# Java 8
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+# Java 17
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
 ```
 
@@ -499,10 +499,10 @@ Si no está, instálala también (aunque Hive normalmente la incluye):
 bash
 
 ```bash
-sudo wget https://repo1.maven.org/maven2/org/apache/commons/commons-collections4/4.4/commons-collections4-4.4.jar
+sudo wget https://repo1.maven.org/maven2/org/apache/commons/commons-collections4/4.6.0/commons-collections4-4.6.0.jar
 ```
 
-✅ Tener ambas versiones (commons-collections y commons-collections4) es normal y necesario en Hive 3.x.
+✅ Tener ambas versiones (commons-collections y commons-collections4) es normal y necesario en Hive 4.x.
 
 🔹🔁 Paso 3: Vuelve a iniciar el Metastore
 
@@ -525,6 +525,7 @@ Deberías ver algo como:
 ```bash
 commons-collections-3.2.2.jar
 commons-collections4-4.4.jar
+commons-collections4-4.6.0.jar
 ```
 
 ## 2️⃣ REINICIAR SERVICIOS DE `HADOOP` Y `HIVE`
@@ -551,6 +552,12 @@ hive --service hiveserver2 &
 ```
 
 # 13. Acceder a Hive `Abrir una Nueva Ventana` de Terminal para realizar la conexión
+
+Acceso por Defecto:
+
+```bash
+beeline -u "jdbc:hive2://172.29.96.93:10000/default" -n hadoop
+```
 
 Acceso Localhost:
 
@@ -1041,6 +1048,6 @@ hive --service hiveserver2 &
 
 `Nota`: En Produccion se usa el permiso `775`
 
-© 2025 Jaime Llanos Bardales.
+© 2026 Jaime Llanos Bardales.
 
 Este trabajo está bajo una licencia [Creative Commons Attribution 4.0 Internacional](LICENSE).
