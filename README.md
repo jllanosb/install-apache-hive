@@ -204,7 +204,7 @@ Hive 4.1.0 (estable para enterprise productivo real con Java 17). [Consulta nuev
 
 ```bash
 cd /tmp
-sudo wget https://archive.apache.org/dist/hive/hive-4.1.3/apache-hive-4.1.0-bin.tar.gz
+sudo wget https://archive.apache.org/dist/hive/hive-4.1.0/apache-hive-4.1.0-bin.tar.gz
 sudo mkdir -p /opt/hive
 sudo tar -xzf apache-hive-4.1.0-bin.tar.gz -C /opt/hive --strip-components=1
 sudo chown -R hadoop:hadoop /opt/hive
