@@ -1,4 +1,4 @@
-# INSTALACIÓN DE APACHE HIVE 4.1.0 + METASTORE EN POSTGRESQL 18
+# INSTALACIÓN DE APACHE HIVE 4.2.1 + METASTORE EN POSTGRESQL 18
 
 Apache Hive es un sistema de data warehouse construido sobre Apache Hadoop, diseñado para facilitar la consulta, análisis y procesamiento de grandes volúmenes de datos almacenados en sistemas distribuidos (como HDFS, Amazon S3, Azure Data Lake, etc.).
 
@@ -40,7 +40,7 @@ Almacenamiento: HDFS / S3 / ADLS / GCS
 1. **Sistema Operativo Ubuntu** 22.04 / 24.04 / 25.10 / 26.04 (Linux, macOS, Windows con WSL)
 2. **JDK 8**
 
-- Hive 4.x (2025–2026) --> JDK 17 (Opcional: JDK 21 LTS)
+- Hive 4.x (2025–2026) --> JDK 21 (Opcional: JDK 25 LTS)
 
 3. **Hadoop (HDFS + YARN)** [Instalar Apache Hadoop 3.5.0](https://github.com/jllanosb/install-apache-hadoop)
 
@@ -198,15 +198,15 @@ Salir de `psql`:
 \q
 ```
 
-# 2. Descargar Apache Hive 4.1.0
+# 2. Descargar Apache Hive 4.2.1
 
-Hive 4.1.0 (estable para enterprise productivo real con Java 17). [Consulta nuevas versiones](https://hive.apache.org/general/downloads/)
+Hive 4.2.1 (estable para enterprise productivo real con Java 21). [Consulta nuevas versiones](https://hive.apache.org/general/downloads/)
 
 ```bash
 cd /tmp
-sudo wget https://archive.apache.org/dist/hive/hive-4.1.0/apache-hive-4.1.0-bin.tar.gz
+sudo wget https://archive.apache.org/dist/hive/hive-4.2.1/apache-hive-4.2.1-bin.tar.gz
 sudo mkdir -p /opt/hive
-sudo tar -xzf apache-hive-4.1.0-bin.tar.gz -C /opt/hive --strip-components=1
+sudo tar -xzf apache-hive-4.2.1-bin.tar.gz -C /opt/hive --strip-components=1
 sudo chown -R hadoop:hadoop /opt/hive
 ```
 
@@ -221,6 +221,7 @@ sudo -u hadoop nano ~/.bashrc
 Agregar al final:
 
 ```bash
+
 # Apache Hive
 export HIVE_HOME=/opt/hive
 export PATH=$PATH:$HIVE_HOME/bin
@@ -241,7 +242,7 @@ hive --version
 Resultado de la version:
 
 ```txt
-Hive 4.1.0
+Hive 4.2.1
 Git git://MacBook-Pro.fios-router.home/Users/ngangam/commit/hive -r 4df4d75bf1e16fe0af75aad0b4179c34c07fc975
 Compiled by ngangam on Sun Apr 3 16:58:16 EDT 2022
 From source with checksum 5da234766db5dfbe3e92926c9bbab2af
@@ -303,20 +304,20 @@ Agregar las Lineas:
 </configuration>
 ```
 
-# 6. Habilitar Java 17 (Solo si no esta instalado)
+# 6. Habilitar Java 21 (Solo si no esta instalado)
 
-`Nota`: Debe estar instalado anteriormente al instalar Hadoop 3.5.0
+`Nota`: Debe haber instalado al configurar Hadoop 3.5.0
 
-## 🔹 Paso 1: Instalar OpenJDK 17
+## 🔹 Paso 1: Instalar OpenJDK 21
 
 En Ubuntu/Debian:
 
 ```bash
 sudo apt update
-sudo apt install openjdk-17-jdk -y
+sudo apt install openjdk-21-jdk -y
 ```
 
-## 🔹Paso 2: Configurar Hive y Hadoop para usar Java 17
+## 🔹Paso 2: Configurar Hive y Hadoop para usar Java 21
 
 Verifica qué versiones de Java tienes:
 
@@ -324,7 +325,7 @@ Verifica qué versiones de Java tienes:
 sudo update-alternatives --config java
 ```
 
-Selecciona la opción que apunte a Java 17 (normalmente `/usr/lib/jvm/java-17-openjdk-amd64/jre/bin/java`).
+Selecciona la opción que apunte a Java 17 (normalmente `/usr/lib/jvm/java-21-openjdk-amd64/jre/bin/java`).
 
 También puedes exportar la ruta manualmente en tu entorno:
 
@@ -335,8 +336,9 @@ sudo nano ~/.bashrc
 Para hacerlo permanente, agrega esas líneas a tu archivo:
 
 ```bash
-# Java 17
-export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+
+# Java 21
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
 ```
 
@@ -357,9 +359,9 @@ java -version
 Debe mostrar algo como:
 
 ```
-openjdk version "17.0.21.0.3" 2026-10-24
-OpenJDK Runtime Environment (build 17.0.21.0.3+1-1-26.04.1-Ubuntu)
-OpenJDK 64-Bit Server VM (build 17.0.21.0.3+1-1-26.04.1-Ubuntu, mixed mode, sharing)
+openjdk version "21.0.21.0.3" 2026-10-24
+OpenJDK Runtime Environment (build 21.0.21.0.3+1-1-26.04.1-Ubuntu)
+OpenJDK 64-Bit Server VM (build 21.0.21.0.3+1-1-26.04.1-Ubuntu, mixed mode, sharing)
 ```
 
 # 7. Inicializar BD Metastore
