@@ -357,7 +357,9 @@ java -version
 Debe mostrar algo como:
 
 ```
-openjdk version "1.8.0_412"
+openjdk version "17.0.21.0.3" 2026-10-24
+OpenJDK Runtime Environment (build 17.0.21.0.3+1-1-26.04.1-Ubuntu)
+OpenJDK 64-Bit Server VM (build 17.0.21.0.3+1-1-26.04.1-Ubuntu, mixed mode, sharing)
 ```
 
 # 7. Inicializar BD Metastore
@@ -576,6 +578,8 @@ Acceso IP_PUBLICA
 ```bash
 beeline -u jdbc:hive2://IP_PUBLICA:10000 -n hadoop -p --verbose=true
 ```
+
+`Nota`: Salir de beeline `!q`
 
 # 14. Probando Hive usando los Comandos Básicos SQL
 
@@ -1011,6 +1015,8 @@ SELECT * FROM bigdata.alumno LIMIT 10;
 ```
 
 # 18. Soluciones de Permisos de Escritura (Test)
+
+`Nota`: Salir de jdbc:hive2://ip:10000/default> digita `!q`
 
 Solucion individual:
 
